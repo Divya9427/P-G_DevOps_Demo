@@ -1,0 +1,33 @@
+pipeline {
+    agent any
+
+    stages {
+        stage ('Compile') {
+
+            steps {
+                withMaven(maven : 'maven_3_5_0') {
+                    sh 'mvn clean compile'
+                    sh 'mvn package -DskipTests=true'
+                }
+            }
+        }
+        
+           stage('SonarQube analysis') {
+      steps {
+        withSonarQubeEnv('sonar') {
+          sh 'mvn clean package sonar:sonar'
+        }
+      }
+    }
+
+        stage ('Testing Stage') {
+
+            steps {
+                withMaven(maven : 'maven_3_5_0') {
+                    sh 'mvn test'
+                }
+            }
+        }
+
+    }
+}
